@@ -1,5 +1,6 @@
 import configparser
 import mimetypes
+import os
 
 from mail import Mail
 from printer import Printer
@@ -8,8 +9,9 @@ from utils import extract_mail_address_from_sender
 
 def main():
     config = configparser.ConfigParser()
-    config.read("./email.config")
-
+    script_directory = os.path.dirname(os.path.realpath(__file__))
+    conf_file_path = os.path.join(script_directory, "email.config")
+    config.read(conf_file_path)
     username = config.get("mail", "mail_address")
     passsword = config.get("mail", "mail_pw")
     imap_server = config.get("mail", "imap_server")
@@ -40,7 +42,11 @@ def main():
         # Check message for attachments
         for counter, part in enumerate(msg.walk()):
             content_type = part.get_content_type()
-            ext = mimetypes.guess_extension(content_type)
+            print(content_type)
+            if content_type == "application/x-pdf":
+                ext = ".pdf"
+            else:
+                ext = mimetypes.guess_extension(content_type)
 
             # Check if extension is a whitelisted on
             if ext and ext in whitelist_extensions:
